@@ -1,1 +1,15 @@
-markdown: rdiscount
+# Dependencies
+markdown:         redcarpet
+pygments:         true
+
+# Permalinks
+permalink:        pretty
+
+author:
+  name:           'Li0liQ'
+  url:            https://github.com/Li0liQ
+
+paginate:         5
+
+github:
+  repo:           https://github.com/Li0liQ/li0liq.github.io

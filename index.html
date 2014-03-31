@@ -3,25 +3,36 @@ layout: default
 title: Li0liQ&#39;s github.io page
 ---
 
-<div class="wrapper">
-  <header class="without-description">
-    <h1>{{ page.title }}</h1>
-    <p></p>
-    <p class="view"><a href="https://github.com/Li0liQ">View the Project on GitHub <small>Li0liQ</small></a></p>
-    <ul>
-      <li class="single"><a href="https://github.com/Li0liQ/li0liq.github.io">View On <strong>GitHub</strong></a></li>
-    </ul>
-  </header>
-  <section>
-    <p>Hi there from Jekyll!</p>
-    {% for post in site.posts %}
+<div class="posts">
+  {% for post in paginator.posts %}
+  <div class="post">
+    <h1 class="post-title">
+      <a href="{{ post.url }}">
+        {{ post.title }}
+      </a>
+    </h1>
 
-        {{ post.date | date: "%B %e, %Y" }}
-        <a href="{{ post.url }}">{{ post.title }}</a>
+    <span class="post-date">{{ post.date | date_to_string }}</span>
 
-    {% endfor %}
-  </section>
+    {{ post.content }}
+  </div>
+  {% endfor %}
 </div>
-<footer>
-  <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-</footer>
+
+<div class="pagination">
+  {% if paginator.next_page %}
+    <a class="pagination-item older" href="/page{{paginator.next_page}}">Older</a>
+  {% else %}
+    <span class="pagination-item older">Older</span>
+  {% endif %}
+  {% if paginator.previous_page %}
+    {% if paginator.page == 2 %}
+      <a class="pagination-item newer" href="/">Newer</a>
+    {% else %}
+      <a class="pagination-item newer" href="/page{{paginator.previous_page}}">Newer</a>
+    {% endif %}
+  {% else %}
+    <span class="pagination-item newer">Newer</span>
+  {% endif %}
+</div>
+
