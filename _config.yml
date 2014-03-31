@@ -11,5 +11,6 @@ author:
 
 paginate:         5
 
+# Custom vars
 github:
   repo:           https://github.com/Li0liQ/li0liq.github.io
