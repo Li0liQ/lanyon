@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link type="text/css" rel="stylesheet" href="css/rickshaw.min.css">
+    <link type="text/css" rel="stylesheet" href="css/nv.d3.css">
     <link type="text/css" rel="stylesheet" href="css/style.css">
   </head>
   <body>
     <div class="scoreChart">
-      <div class="chart"></div>      
-      <div class="x_axis"></div>
+      <svg style='height:500px'> </svg>
     </div>
     <div class="statistics">
     </div>
@@ -16,7 +15,7 @@
     <div id="loading"></div>
     <script src="js/tabletop.js"></script>
     <script src="js/d3.v3.js"></script>
-    <script src="js/rickshaw.min.js"></script>    
+    <script src="js/nv.d3.min.js"></script>
     <script type="text/javascript">
       window.onload = function(){
         init();
@@ -89,56 +88,58 @@
       function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
         // Render score graph.
         {
-          var teamAScoreData = resultArray.map(function(item, index){
-            return {
-              x : index,
-              y : item.scoreA
-            };
-          });
 
-          var teamBScoreData = resultArray.map(function(item, index){
-            return {
-              x : index,
-              y : item.scoreB
-            };
-          });
+          nv.addGraph(function() {
+            var chart = nv.models.lineChart()
+              .margin({left: 50})
+              .useInteractiveGuideline(true)
+              .transitionDuration(350)
+              .showLegend(true)
+              .showYAxis(true)
+              .showXAxis(true)
+            ;
 
-          var graph = new Rickshaw.Graph( {
-            element: document.querySelector('.scoreChart .chart'),
-            renderer: 'line',
-            series: [{
-                color: 'steelblue',
-                data: teamAScoreData,
-                name: teamAName
-              }, {
-                color: 'lightblue',
-                data: teamBScoreData,
-                name: teamBName
-              }]
-          } );
+            chart.xAxis
+                .axisLabel('Date')
+                .tickFormat(function (x){
+                    return gameNameArray[x];
+                });
 
-          graph.renderer.unstack = true;
+            chart.yAxis
+                .axisLabel('Games won')
+                .tickFormat(d3.format('d'));
 
-          function xFormat(x){
-              return gameNameArray[x];
-          }
+            var teamAScoreData = resultArray.map(function(item, index){
+              return {
+                x : index,
+                y : item.scoreA
+              };
+            });
 
-          var x_ticks = new Rickshaw.Graph.Axis.X( {
-            graph: graph,
-            orientation: 'bottom',
-            element: document.querySelector('.scoreChart .x_axis'),
-            pixelsPerTick: 200,
-            tickFormat: xFormat
-          });
+            var teamBScoreData = resultArray.map(function(item, index){
+              return {
+                x : index,
+                y : item.scoreB
+              };
+            });
 
-          graph.render();
+            var data =[{
+              values: teamAScoreData,
+              key: teamAName,
+              color: '#ff7f0e'
+            }, {
+              values: teamBScoreData,
+              key: teamBName,
+              color: '#2ca02c'
+            }];
 
-          var hoverDetail = new Rickshaw.Graph.HoverDetail({
-              graph: graph,
-              xFormatter: xFormat,
-              formatter: function(series, x, y) {
-                return series.name + ': ' + y;
-              }
+            d3.select('.scoreChart svg')
+              .datum(data)
+              .call(chart);
+
+            nv.utils.windowResize(function() { chart.update() });
+
+            return chart;
           });
         }
 
