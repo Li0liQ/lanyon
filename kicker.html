@@ -2,6 +2,7 @@
 <html>
   <head>
     <link type="text/css" rel="stylesheet" href="css/rickshaw.min.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
   </head>
   <body>
     <div class="scoreChart">
@@ -12,7 +13,7 @@
     </div>
 
     <p id="data"></p>
-
+    <div id="loading"></div>
     <script src="js/tabletop.js"></script>
     <script src="js/d3.v3.js"></script>
     <script src="js/rickshaw.min.js"></script>    
@@ -51,6 +52,9 @@
         var scoreA = 'scorea';
         var scoreB = 'scoreb';
         var date = 'date';
+
+        var loadingDiv = document.getElementById('loading');
+        loadingDiv.remove();
 
         var resultArray = data.map(function(item, index){
           return {
