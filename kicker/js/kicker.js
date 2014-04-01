@@ -36,12 +36,18 @@ function showInfo(data) {
   var loadingDiv = document.getElementById('loading');
   loadingDiv.remove();
 
-  var resultArray = data.map(function(item, index){
-    return {
-      scoreA : item[scoreA],
-      scoreB : item[scoreB]
-    };
-  });
+  var teamList = [data[0][teamA], data[0][teamB]];
+
+  var resultArray = data
+    .filter(function(item){
+      return teamList.indexOf(item[teamA]) != -1 && teamList.indexOf(item[teamB]) != -1;
+    })
+    .map(function(item, index){
+      return {
+        scoreA : item[scoreA],
+        scoreB : item[scoreB]
+      };
+    });
 
   var gameNameArray = data.map(function(item, index){
     return item[date];
