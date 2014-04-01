@@ -14,10 +14,10 @@ p#data table tr:hover {
 	background-color: #d7f4ff;
 }
 .statistics table tr td:first-child {
-	background-color: #fdd7a2;
+	background-color: rgba(255, 127, 14, .6);
 }
 .statistics table tr td:last-child {
-	background-color: #9edfc6;
+	background-color: rgba(44, 160, 44, .6);
 }
 #loading {
 	background: url(loading.gif) 0 0 no-repeat;

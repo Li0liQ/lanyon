@@ -174,7 +174,7 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
           .axisLabel('Games won')
           .tickFormat(d3.format('d'));
 
-        var perDayData = [{
+        var data = [{
           key: teamAName,
           values: teamAPerDayData,
           color: teamAColor
@@ -185,13 +185,79 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
         }];
 
         d3.select('.scorePerDayChart svg')
-            .datum(perDayData)
+            .datum(data)
             .call(chart);
 
         nv.utils.windowResize(chart.update);
 
         return chart;
     });
+  }
+
+  // Render aggregate chart
+  {
+    nv.addGraph(function() {
+      var chart = nv.models.stackedAreaChart()
+        .margin({right: 50})
+        .useInteractiveGuideline(true)
+        .rightAlignYAxis(true)
+        .transitionDuration(500)
+        .showControls(true)
+        .clipEdge(true);
+
+      chart.xAxis
+        .axisLabel('Date')
+        .tickFormat(function (x){
+            return gameNameArray[x];
+        });
+
+      chart.yAxis
+        .axisLabel('Games won')
+        .tickFormat(d3.format('d'));
+
+      var teamAWinAggregateData = resultArray
+        .reduce(function(agg, item, index){
+          var currentAggregate = (agg[index - 1] || 0) + ((item.scoreA > item.scoreB) ? 1 : 0);
+
+          agg.push(currentAggregate);
+                    
+          return agg;
+        }, [])
+        .map(function(item, index){
+          return {x : index, y : item};
+        });
+
+      var teamBWinAggregateData = resultArray
+        .reduce(function(agg, item, index){
+          var currentAggregate = (agg[index - 1] || 0) + ((item.scoreB > item.scoreA) ? 1 : 0);
+
+          agg.push(currentAggregate);
+                    
+          return agg;
+        }, [])
+        .map(function(item, index){
+          return {x : index, y : item};
+        });
+
+      var data = [{
+        key: teamAName,
+        values: teamAWinAggregateData,
+        color: teamAColor
+      }, {
+        key: teamBName,
+        values: teamBWinAggregateData,
+        color: teamBColor
+      }];
+
+      d3.select('.scoreCummulativeChart svg')
+        .datum(data)
+        .call(chart);
+
+      nv.utils.windowResize(chart.update);
+
+      return chart;
+    });
+
 
   }
   
