@@ -1,0 +1,30 @@
+body {
+	font-family: Arial;
+}
+table {
+	border-spacing: 0;
+}
+table td {
+	padding: 3px 5px;
+}
+p#data table tr:nth-child(odd) {
+	background-color: #eaeaea;
+}
+p#data table tr:hover {
+	background-color: #d7f4ff;
+}
+.statistics table tr td:first-child {
+	background-color: #fdd7a2;
+}
+.statistics table tr td:last-child {
+	background-color: #9edfc6;
+}
+#loading {
+	background: url(loading.gif) 0 0 no-repeat;
+	width: 66px;
+	height: 66px;
+	left: 50%;
+	top: 50%;
+	position: absolute;
+	margin: -33px 0 0 -33px;
+}
