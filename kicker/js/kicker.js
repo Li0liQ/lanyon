@@ -27,15 +27,15 @@ function init() {
 }
 
 function showInfo(data) {
+  var loadingDiv = document.querySelector('#loading');
+  
+  loadingDiv.remove();
+
   var teamA = 'teama';
   var teamB = 'teamb';
   var scoreA = 'scorea';
   var scoreB = 'scoreb';
   var date = 'date';
-
-  var loadingDiv = document.getElementById('loading');
-  loadingDiv.remove();
-
   var teamList = [data[0][teamA], data[0][teamB]];
 
   var resultArray = data
@@ -59,23 +59,16 @@ function showInfo(data) {
     return [item[date], item[teamA], item[scoreA], item[scoreB], item[teamB]];
   }))
 
-  // data comes through as a simple array since simpleSheet is turned on
-  document.querySelector("#data").innerHTML = resultTable;//JSON.stringify(data);
-
-/*        var teamAExpectedResult = teamAScoreData.reduce(function(agregate, currentValue){
-    return agregate + currentValue.y;
-  }, 0) / teamAScoreData.length;
-  var teamBExpectedResult = teamBScoreData.reduce(function(agregate, currentValue){
-    return agregate + currentValue.y;
-  }, 0) / teamBScoreData.length;
-
-  alert(teamAExpectedResult + ' : ' + teamBExpectedResult);*/
+  document.querySelector("#data").innerHTML = resultTable;
 }
 
 function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
+
+  var teamAColor = '#ff7f0e';
+  var teamBColor = '#2ca02c';
+
   // Render score graph.
   {
-
     nv.addGraph(function() {
       var chart = nv.models.lineChart()
         .margin({left: 50})
@@ -113,11 +106,11 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
       var data =[{
         values: teamAScoreData,
         key: teamAName,
-        color: '#ff7f0e'
+        color: teamAColor
       }, {
         values: teamBScoreData,
         key: teamBName,
-        color: '#2ca02c'
+        color: teamBColor
       }];
 
       d3.select('.scoreChart svg')
@@ -130,6 +123,78 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
     });
   }
 
+  // Render day graph
+  {
+    var dayIdArray = gameNameArray.map(function(item){
+      var date = new Date(item);
+      return date.getDay();
+    });
+
+    var teamAPerDayData = resultArray
+      .reduce(function(agg, item, index){
+        if (item.scoreA > item.scoreB){
+          agg[dayIdArray[index]]++;
+        }
+
+        return agg;
+      }, [0, 0, 0, 0, 0, 0, 0])
+      .map(function(item, index){
+        return {x : index, y : item};
+      });
+
+    var teamBPerDayData = resultArray
+      .reduce(function(agg, item, index){
+        if (item.scoreB > item.scoreA){
+          agg[dayIdArray[index]]++;
+        }
+        
+        return agg;
+      }, [0, 0, 0, 0, 0, 0, 0])
+      .map(function(item, index){
+        return {x : index, y : item};
+      });
+
+    nv.addGraph(function() {
+        var chart = nv.models.multiBarChart()
+          .margin({left: 50})
+          .transitionDuration(350)
+          .reduceXTicks(true)
+          .rotateLabels(0)
+          .showControls(true)
+          .groupSpacing(0.1)
+        ;
+
+        chart.xAxis
+          .axisLabel('Day of week')
+          .tickFormat(function (x){
+              return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][x];
+          });
+
+        chart.yAxis
+          .axisLabel('Games won')
+          .tickFormat(d3.format('d'));
+
+        var perDayData = [{
+          key: teamAName,
+          values: teamAPerDayData,
+          color: teamAColor
+        }, {
+          key: teamBName,
+          values: teamBPerDayData,
+          color: teamBColor
+        }];
+
+        d3.select('.scorePerDayChart svg')
+            .datum(perDayData)
+            .call(chart);
+
+        nv.utils.windowResize(chart.update);
+
+        return chart;
+    });
+
+  }
+  
   // Render statistics
   {
     var teamAWinCount = resultArray.filter(function(item){
