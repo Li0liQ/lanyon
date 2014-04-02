@@ -38,10 +38,12 @@ function showInfo(data) {
   var date = 'date';
   var teamList = [data[0][teamA], data[0][teamB]];
 
-  var resultArray = data
+  var filteredData = data
     .filter(function(item){
       return teamList.indexOf(item[teamA]) != -1 && teamList.indexOf(item[teamB]) != -1;
-    })
+    });
+
+  var resultArray = filteredData
     .map(function(item, index){
       return {
         scoreA : item[scoreA],
@@ -49,7 +51,7 @@ function showInfo(data) {
       };
     });
 
-  var gameNameArray = data.map(function(item, index){
+  var gameNameArray = filteredData.map(function(item, index){
     return item[date];
   });
 
