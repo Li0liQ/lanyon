@@ -59,7 +59,7 @@ function showInfo(data) {
 
   var resultTable = getTable(data.map(function(item){
     return [item[date], item[teamA], item[scoreA], item[scoreB], item[teamB]];
-  }))
+  }));
 
   document.querySelector("#data").innerHTML = resultTable;
 }
@@ -119,7 +119,7 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
         .datum(data)
         .call(chart);
 
-      nv.utils.windowResize(function() { chart.update() });
+      nv.utils.windowResize(function() { chart.update(); });
 
       return chart;
     });
@@ -190,7 +190,7 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
             .datum(data)
             .call(chart);
 
-        nv.utils.windowResize(chart.update);
+        nv.utils.windowResize(function() { chart.update(); });
 
         return chart;
     });
@@ -251,16 +251,14 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
         color: teamBColor
       }];
 
-      d3.select('.scoreCummulativeChart svg')
+      d3.select('.scoreCumulativeChart svg')
         .datum(data)
         .call(chart);
 
-      nv.utils.windowResize(chart.update);
+      nv.utils.windowResize(function() { chart.update(); });
 
       return chart;
     });
-
-
   }
   
   // Render statistics
