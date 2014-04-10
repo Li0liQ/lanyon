@@ -45,9 +45,18 @@ function showInfo(data) {
 
   var resultArray = filteredData
     .map(function(item, index){
+      var winCountA = item[scoreA];
+      var winCountB = item[scoreB];
+      var isWinA = winCountA > winCountB;
+      var isWinB = winCountB > winCountA;
+      var score = winCountA > winCountB ? winCountA + ' : ' + winCountB : winCountB + ' : ' + winCountA; 
+
       return {
-        scoreA : item[scoreA],
-        scoreB : item[scoreB]
+        scoreA : winCountA,
+        scoreB : winCountB,
+        isWinA : isWinA,
+        isWinB : isWinB,
+        score : score
       };
     });
 
@@ -65,9 +74,12 @@ function showInfo(data) {
 }
 
 function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
-
   var teamAColor = '#ff7f0e';
   var teamBColor = '#2ca02c';
+
+  function convertToXy(item, index){
+    return {x : index, y : item};
+  }
 
   // Render score graph.
   {
@@ -134,27 +146,23 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
 
     var teamAPerDayData = resultArray
       .reduce(function(agg, item, index){
-        if (item.scoreA > item.scoreB){
+        if (item.isWinA){
           agg[dayIdArray[index]]++;
         }
 
         return agg;
       }, [0, 0, 0, 0, 0, 0, 0])
-      .map(function(item, index){
-        return {x : index, y : item};
-      });
+      .map(convertToXy);
 
     var teamBPerDayData = resultArray
       .reduce(function(agg, item, index){
-        if (item.scoreB > item.scoreA){
+        if (item.isWinB){
           agg[dayIdArray[index]]++;
         }
         
         return agg;
       }, [0, 0, 0, 0, 0, 0, 0])
-      .map(function(item, index){
-        return {x : index, y : item};
-      });
+      .map(convertToXy);
 
     nv.addGraph(function() {
         var chart = nv.models.multiBarChart()
@@ -219,27 +227,23 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
 
       var teamAWinAggregateData = resultArray
         .reduce(function(agg, item, index){
-          var currentAggregate = (agg[index - 1] || 0) + ((item.scoreA > item.scoreB) ? 1 : 0);
+          var currentAggregate = (agg[index - 1] || 0) + ((item.isWinA) ? 1 : 0);
 
           agg.push(currentAggregate);
                     
           return agg;
         }, [])
-        .map(function(item, index){
-          return {x : index, y : item};
-        });
+        .map(convertToXy);
 
       var teamBWinAggregateData = resultArray
         .reduce(function(agg, item, index){
-          var currentAggregate = (agg[index - 1] || 0) + ((item.scoreB > item.scoreA) ? 1 : 0);
+          var currentAggregate = (agg[index - 1] || 0) + ((item.isWinB) ? 1 : 0);
 
           agg.push(currentAggregate);
                     
           return agg;
         }, [])
-        .map(function(item, index){
-          return {x : index, y : item};
-        });
+        .map(convertToXy);
 
       var data = [{
         key: teamAName,
@@ -260,14 +264,51 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
       return chart;
     });
   }
-  
+
+
+  // Render aggregate chart
+  {
+      nv.addGraph(function() {
+        var chart = nv.models.pieChart()
+            .x(function(d) { return d.label })            
+            .y(function(d) { return d.value })
+            .labelType("percent")
+            .pieLabelsOutside(false)
+            .valueFormat(d3.format('d'))
+            .showLabels(true);
+
+      var scoreHash = resultArray
+        .reduce(function(agg, item, index){
+          agg[item.score] = (agg[item.score] || 0) + 1;        
+
+          return agg;
+        }, {});
+
+      var data = Object.keys(scoreHash).map(function(key){
+          return {
+            label : key,
+            value : scoreHash[key]
+          };
+      });
+
+      d3.select(".scoreCountChart svg")
+          .datum(data)
+          .transition().duration(350)
+          .call(chart);
+
+      nv.utils.windowResize(function() { chart.update(); });
+
+      return chart;
+    });
+  }
+
   // Render statistics
   {
     var teamAWinCount = resultArray.filter(function(item){
-      return item.scoreA > item.scoreB;
+      return item.isWinA;
     }).length;
     var teamBWinCount = resultArray.filter(function(item){
-      return item.scoreB > item.scoreA;
+      return item.isWinB;
     }).length;
     var teamAGamesWonCount = resultArray.reduce(function(agg, item){
       return agg + item.scoreA;
@@ -282,13 +323,14 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
     var currentBWinSequence = 0;
 
     for (var i = 0; i < resultArray.length; i++){
-      var isAVictor = resultArray[i].scoreA > resultArray[i].scoreB; 
-      var isBVictor = resultArray[i].scoreA < resultArray[i].scoreB;
+      var isAVictor = resultArray[i].isWinA;
+      var isBVictor = resultArray[i].isWinB;
 
       if (isAVictor){
         if (currentBWinSequence > 0){
           currentBWinSequence = 0;
         }
+
         currentAWinSequence++;
 
         if (currentAWinSequence > teamALongestWinSequence){
@@ -300,6 +342,7 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
         if (currentAWinSequence > 0){
           currentAWinSequence = 0;
         }
+
         currentBWinSequence++;
 
         if (currentBWinSequence > teamBLongestWinSequence){
