@@ -140,8 +140,20 @@ function renderStatistics(resultArray, gameNameArray, teamAName, teamBName){
   // Render day graph
   {
     var dayIdArray = gameNameArray.map(function(item){
-      var date = new Date(item);
-      return date.getDay();
+      var dateString = item
+        .split('-')
+        .map(function(datePart){
+          if (datePart.length < 2){
+            return '0' + datePart
+          } else {
+            return datePart;
+          }
+        })
+        .join('-');
+      var date = new Date(dateString);
+      var result =  date.getDay();
+      
+      return result;
     });
 
     var teamAPerDayData = resultArray
